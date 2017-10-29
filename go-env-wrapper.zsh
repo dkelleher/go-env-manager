@@ -81,7 +81,7 @@ function _go-env() {
 	_arguments -C \
 		"-h[Show help information]" \
 		"--h[Show help information]" \
-		"1: :(create activate deactivate delete)"
+		"1:go-env command:(create activate deactivate delete)"
 }
 
 
