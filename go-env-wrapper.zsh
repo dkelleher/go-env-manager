@@ -52,7 +52,8 @@ function go-env {
 			;;
 		delete)
 			if [[ -d $env_path ]]; then
-				read -q "reply?==> Remove go-env $2 are you sure [y/n]?"
+				echo "==> Remove go-env $2 are you sure [y/n]?"
+				read reply
 				if [[ $reply == 'y' ]]; then
 					echo "==> Removing go-env $2"
 					rm -rf $env_path
