@@ -72,3 +72,16 @@ function go-env {
 			;;
 	esac
 }
+
+
+function _go-env() {
+	local line
+
+	_arguments -C \
+		"-h[Show help information]" \
+		"--h[Show help information]" \
+		"1: :(create activate deactivate delete)"
+}
+
+
+compdef _go-env go-env
