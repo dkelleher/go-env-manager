@@ -11,7 +11,7 @@ function go-env {
 	local env_path=$GOENVPATH/$2
 
 	if [[ "$#" -ne 2 ]]; then
-		echo "==> Illegal number of parameters"
+		echo $help
 		return 1
 	fi
 
