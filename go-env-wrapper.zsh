@@ -6,9 +6,73 @@ if [[ -z $GOENVPATH ]]; then
 fi
 
 
+function _goenv-create {
+	local env_path=$GOENVPATH/$1
+
+	if [[ ! -d $env_path ]]; then
+		echo "===> Creating go-env $1"
+		mkdir -p $env_path
+		return 0
+	else
+		echo "===> Failure to create go-env $1, may already exist."
+		return 1
+	fi
+}
+
+
+function _goenv-activate {
+	local env_path=$GOENVPATH/$1
+
+	if [[ -d $env_path ]]; then
+		echo "===> Activating go-env $1"
+		export GOPATH=$env_path
+		export PATH=$env_path/bin:$PATH
+		export GOENV_ACTIVATED=$1
+		return 0
+	else
+		echo "===> Failure to activate $1, may not exist."
+		return 1
+	fi
+}
+
+
+function _goenv-deactivate {
+	if [[ -v GOENV_ACTIVATED ]]; then
+		echo "===> Deactivation go-env $1"
+		export PATH=$(echo $PATH | sed "s|$GOPATH/bin:||g")
+		unset GOPATH
+		unset GOENV_ACTIVATED
+		return 0
+	else
+		echo "===> Failure to deactivate $1, environment may not be active."
+		return 1
+	fi
+}
+
+
+function _goenv-delete {
+	local env_path=$GOENVPATH/$1
+
+	if [[ -d $env_path ]]; then
+		echo "===> Delete go-env $1 are you sure [y/n]?"
+		read reply
+		if [[ $reply == 'y' ]]; then
+			echo "===> Deleteing"
+			rm -rf $env_path
+			return 0
+		else
+			echo "===> Exiting"
+			return 0
+		fi
+	else
+		echo "===> Failure to delete $1, environment may not exist."
+		return 1
+	fi
+}
+
+
 function go-env {
 	local help="Usage: $0 {create|activate|deactivate|delete} name"
-	local env_path=$GOENVPATH/$2
 
 	if [[ "$#" -ne 2 ]]; then
 		echo $help
@@ -17,55 +81,16 @@ function go-env {
 
 	case "$1" in
 		create)
-			if [[ ! -d $env_path ]]; then
-				echo "==> Creating go-env $2"
-				mkdir -p $env_path
-				return 0
-			else
-				echo "==> Failure to create go-env $2, may already exist."
-				return 1
-			fi
+			_goenv-create $2
 			;;
 		activate)
-			if [[ -d $env_path ]]; then
-				echo "==> Activating go-env $2"
-				export GOPATH=$env_path
-				export PATH=$env_path/bin:$PATH
-				export GOENV_ACTIVATED=true
-				return 0
-			else
-				echo "==> Failure to activate $2, may not exist."
-				return 1
-			fi
+			_goenv-activate $2
 			;;
 		deactivate)
-			if ( $GOENV_ACTIVATED ); then
-				echo "==> Deactivating go-env $2"
-				export PATH=$(echo $PATH | sed "s|$GOPATH/bin:||g")
-				unset GOPATH
-				unset GOENV_ACTIVATED
-				return 0
-			else
-				echo "==> Failure to deactivate $2, environment may not be active."
-				return 1
-			fi
+			_goenv-deactivate $2
 			;;
 		delete)
-			if [[ -d $env_path ]]; then
-				echo "==> Remove go-env $2 are you sure [y/n]?"
-				read reply
-				if [[ $reply == 'y' ]]; then
-					echo "==> Removing go-env $2"
-					rm -rf $env_path
-					return 0
-				else
-					echo "==> Exiting"
-					return 0
-				fi
-			else
-				echo "==> Failure to delete $2, environment may not exist."
-				return 1
-			fi
+			_goenv-delete $2
 			;;
 		*)
 			echo $help >&2
