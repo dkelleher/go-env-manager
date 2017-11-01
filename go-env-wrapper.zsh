@@ -6,8 +6,19 @@ if [[ -z $GOENVPATH ]]; then
 fi
 
 
+function _goenv-envpath {
+	echo "$GOENVPATH/envs/$1"
+}
+
+
+function _goenv-help-string {
+	echo "Usage: $0 {create|activate|deactivate|delete} name" >&2
+	exit 1
+}
+
+
 function _goenv-create {
-	local env_path=$GOENVPATH/$1
+	local env_path=$(_goenv-envpath $1)
 
 	if [[ ! -d $env_path ]]; then
 		echo "===> Creating go-env $1"
@@ -21,7 +32,7 @@ function _goenv-create {
 
 
 function _goenv-activate {
-	local env_path=$GOENVPATH/$1
+	local env_path=$(_goenv-envpath $1)
 
 	if [[ -d $env_path ]]; then
 		echo "===> Activating go-env $1"
@@ -51,7 +62,7 @@ function _goenv-deactivate {
 
 
 function _goenv-delete {
-	local env_path=$GOENVPATH/$1
+	local env_path=$(_goenv-envpath $1)
 
 	if [[ -d $env_path ]]; then
 		echo "===> Delete go-env $1 are you sure [y/n]?"
@@ -75,8 +86,7 @@ function go-env {
 	local help="Usage: $0 {create|activate|deactivate|delete} name"
 
 	if [[ "$#" -ne 2 ]]; then
-		echo $help
-		return 1
+		_goenv-help-string
 	fi
 
 	case "$1" in
@@ -93,8 +103,7 @@ function go-env {
 			_goenv-delete $2
 			;;
 		*)
-			echo $help >&2
-			return 1
+			_goenv-help-string
 			;;
 	esac
 }
@@ -106,7 +115,7 @@ function _go-env() {
 		"-h[Show help information]" \
 		"--h[Show help information]" \
 		"1:go-env command:(create activate deactivate delete)" \
-		"2:go-env environments:($GOENVPATH/*(:t))"
+		"2:go-env environments:($GOENVPATH/envs/*(:t))"
 }
 
 
